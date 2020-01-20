@@ -24,8 +24,8 @@ end
 function Base.iterate(iter::TabixOverlapIterator)
     @assert iter.reader.index !== nothing
     # TODO: Use a method that resets the reading position.
-    buffer = BioCore.IO.stream(iter.reader)
-    iter.reader.state = BioCore.Ragel.State(1, BufferedStreams.BufferedInputStream(buffer.source))
+    buffer = BioGenerics.IO.stream(iter.reader)
+    iter.reader.state = BioGenerics.Ragel.State(1, BufferedStreams.BufferedInputStream(buffer.source))
     state = TabixOverlapIteratorState(
         Indexes.overlapchunks(iter.reader.index, iter.interval),
         0,
@@ -36,7 +36,7 @@ function Base.iterate(iter::TabixOverlapIterator)
 end
 
 function done(iter::TabixOverlapIterator, state)
-    buffer = BioCore.IO.stream(iter.reader)
+    buffer = BioGenerics.IO.stream(iter.reader)
     source = buffer.source
     if state.chunkid == 0
         if isempty(state.chunks)
@@ -79,10 +79,10 @@ function Base.iterate(iter::TabixOverlapIterator, state)
 end
 
 function icmp(record, interval)
-    c = cmp(BioCore.seqname(record), interval.seqname)
-    if c < 0 || (c == 0 && BioCore.rightposition(record) < interval.first)
+    c = cmp(BioGenerics.seqname(record), interval.seqname)
+    if c < 0 || (c == 0 && BioGenerics.rightposition(record) < interval.first)
         return -1
-    elseif c > 0 || (c == 0 && BioCore.leftposition(record) > interval.last)
+    elseif c > 0 || (c == 0 && BioGenerics.leftposition(record) > interval.last)
         return +1
     else
         return 0
